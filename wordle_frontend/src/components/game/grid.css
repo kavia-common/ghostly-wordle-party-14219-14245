@@ -1,0 +1,91 @@
+.grid {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+.grid-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.grid-cell {
+  border: 1px solid var(--color-border);
+  background: #fff;
+  border-radius: 10px;
+  aspect-ratio: 1/1;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 22px;
+  text-transform: uppercase;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.status-correct {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22C55E;
+}
+.status-present {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #F59E0B;
+}
+.status-absent {
+  background: rgba(156, 163, 175, 0.18);
+  border-color: #9CA3AF;
+}
+.status-empty {
+  background: #fff;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+.grid-row.shake .grid-cell {
+  animation: shake .5s both;
+}
+```
+
+Explanation: On-screen keyboard component mapping letter states with interactivity.
+````write file="ghostly-wordle-party-14219-14245/wordle_frontend/src/components/game/Keyboard.js"
+import React from "react";
+import "./keyboard.css";
+
+const KEYS = [
+  ["q","w","e","r","t","y","u","i","o","p"],
+  ["a","s","d","f","g","h","j","k","l"],
+  ["enter","z","x","c","v","b","n","m","back"],
+];
+
+/**
+ * Keyboard with letter coloring based on known statuses.
+ * statuses: { letter: 'correct'|'present'|'absent' }
+ */
+// PUBLIC_INTERFACE
+export function Keyboard({ onKey, statuses = {} }) {
+  return (
+    <div className="kb">
+      {KEYS.map((row, ridx) => (
+        <div className="kb-row" key={ridx}>
+          {row.map((k) => {
+            const label = k === "back" ? "⌫" : k.toUpperCase();
+            const st = statuses[k] || "neutral";
+            return (
+              <button
+                key={k}
+                className={`kb-key kb-${st} ${k.length > 1 ? "kb-wide" : ""}`}
+                onClick={() => onKey(k)}
+                aria-label={`key ${k}`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}

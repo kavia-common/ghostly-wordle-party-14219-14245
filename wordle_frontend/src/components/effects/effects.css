@@ -1,0 +1,139 @@
+.disco {
+  pointer-events: none;
+  position: fixed; inset: 0;
+  opacity: 0; transition: opacity 200ms ease;
+}
+.disco.active { opacity: 1; }
+.disco .beam {
+  position: absolute; inset: -30%;
+  filter: blur(60px);
+  mix-blend-mode: screen;
+  opacity: 0.65;
+  transform: rotate(15deg);
+  animation: swirl 4s linear infinite;
+}
+.disco .beam.blue { background: radial-gradient(600px 600px at 20% 20%, rgba(37,99,235,.24), transparent 60%); }
+.disco .beam.amber { background: radial-gradient(500px 500px at 80% 30%, rgba(245,158,11,.22), transparent 60%); animation-duration: 5s; }
+.disco .beam.green { background: radial-gradient(560px 560px at 50% 80%, rgba(34,197,94,.22), transparent 60%); animation-duration: 6s; }
+@keyframes swirl {
+  0% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-20px) rotate(3deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+.popper {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0; transition: opacity 200ms ease;
+}
+.popper.active { opacity: 1; }
+.confetti {
+  position: absolute;
+  top: -10px;
+  display: inline-block;
+  border-radius: 2px;
+  animation: fall 1600ms ease-out forwards;
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(540deg); opacity: 0.8; }
+}
+
+.ghost-overlay {
+  position: fixed; inset: 0;
+  background: rgba(17,24,39,0.5);
+  display: grid; place-items: center;
+  pointer-events: none;
+  opacity: 0; transition: opacity 260ms ease;
+}
+.ghost-overlay.active { opacity: 1; }
+.ghost {
+  width: 140px; height: 160px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 70px 70px 20px 20px;
+  position: relative;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+  animation: floaty 3s ease-in-out infinite;
+}
+.ghost:after, .ghost:before {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  width: 30px; height: 24px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 50%;
+}
+.ghost:before { left: 24px; }
+.ghost:after { right: 24px; }
+.ghost .eyes {
+  display: flex; gap: 18px;
+  position: absolute; top: 50px; left: 50%; transform: translateX(-50%);
+}
+.ghost .eye { width: 18px; height: 18px; background: #111827; border-radius: 50%; }
+.ghost .mouth {
+  width: 26px; height: 16px; border: 4px solid #111827; border-top: none;
+  border-radius: 0 0 20px 20px;
+  position: absolute; top: 88px; left: 50%; transform: translateX(-50%);
+}
+@keyframes floaty {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.ghost-message {
+  margin-top: 16px;
+  color: #FDE68A;
+  font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  font-size: 18px;
+}
+```
+
+Explanation: Auth pages: Login, Register, Forgot and Reset. Uses AuthContext methods and UI components.
+````write file="ghostly-wordle-party-14219-14245/wordle_frontend/src/pages/Auth/LoginPage.js"
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { Button, Card, Input } from "../../components/common/UI";
+
+// PUBLIC_INTERFACE
+export default function LoginPage() {
+  const { login } = useAuth();
+  const nav = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setErr("");
+    setLoading(true);
+    try {
+      await login(username, password);
+      nav("/");
+    } catch (error) {
+      setErr(error.payload?.non_field_errors?.[0] || "Login failed. Check your credentials.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="page-auth">
+      <Card>
+        <h2>Welcome back</h2>
+        <p style={{ color: "var(--color-text-muted)" }}>Log in to continue your ghostly streak.</p>
+        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12, marginTop: 12 }}>
+          <Input label="Username" value={username} onChange={setUsername} name="username" required autoComplete="username" />
+          <Input label="Password" type="password" value={password} onChange={setPassword} name="current-password" required autoComplete="current-password" />
+          {err && <div style={{ color: "var(--color-error)", fontWeight: 700 }}>{err}</div>}
+          <Button type="submit" full disabled={loading}>{loading ? "Logging in..." : "Log in"}</Button>
+        </form>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
+          <Link to="/register">Create an account</Link>
+          <Link to="/forgot">Forgot password?</Link>
+        </div>
+      </Card>
+    </div>
+  );
+}

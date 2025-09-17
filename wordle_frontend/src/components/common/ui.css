@@ -1,0 +1,177 @@
+:root {
+  --color-primary: #2563EB;
+  --color-secondary: #F59E0B;
+  --color-bg: #f9fafb;
+  --color-surface: #ffffff;
+  --color-text: #111827;
+  --color-text-muted: #6B7280;
+  --color-border: #E5E7EB;
+
+  --radius: 12px;
+  --shadow: 0 8px 20px rgba(0,0,0,0.08);
+  --transition: all 220ms ease;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(37,99,235,0.06), rgba(255,255,255,0.0));
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(6px);
+}
+
+.nav-left { display: flex; align-items: center; gap: 8px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo { font-size: 22px; }
+.brand-name { font-weight: 700; color: var(--color-primary); }
+
+.nav-center { display: flex; gap: 16px; justify-content: center; }
+.nav-right { display: flex; gap: 12px; justify-content: flex-end; align-items: center; }
+
+.nav-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 10px;
+  transition: var(--transition);
+}
+.nav-link:hover { color: var(--color-text); background: rgba(37,99,235,0.08); }
+.nav-link.highlight { color: var(--color-surface); background: var(--color-primary); }
+.nav-link.highlight:hover { opacity: 0.9; }
+
+.user-pill {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(300px, 720px) minmax(240px, 320px);
+  gap: 18px;
+  padding: 18px;
+}
+
+.layout-left, .layout-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.layout-center {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.btn {
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn:hover { transform: translateY(-1px); opacity: .95; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary);
+}
+.btn-full { width: 100%; }
+
+.input-group { display: grid; gap: 6px; }
+.input-label { font-size: 13px; color: var(--color-text-muted); font-weight: 600; }
+.input {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+  transition: var(--transition);
+  background: #fff;
+}
+.input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: grid; place-items: center;
+  z-index: 50;
+}
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  width: min(560px, 92vw);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  animation: modalIn 220ms ease;
+}
+@keyframes modalIn { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-bottom: 1px solid var(--color-border);
+}
+.modal-title { font-weight: 800; }
+.modal-close {
+  background: transparent; border: none; font-size: 22px; cursor: pointer;
+}
+.modal-body { padding: 14px; }
+
+@media (max-width: 1000px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .nav-center { display: none; }
+}
+```
+
+Explanation: Implement game grid, keyboard, and result renderer. Provides animated coloring and shake. 
+````write file="ghostly-wordle-party-14219-14245/wordle_frontend/src/components/game/Grid.js"
+import React from "react";
+import "./grid.css";
+
+/**
+ * Renders the 5-row grid. Each row shows letters and their status:
+ * - correct (green), present (amber), absent (gray), or empty.
+ * Expects rows: Array<Array<{ char: string, status: 'correct'|'present'|'absent'|'empty' }>>
+ */
+// PUBLIC_INTERFACE
+export function Grid({ rows = [], shakingRow = -1 }) {
+  return (
+    <div className="grid">
+      {rows.map((row, idx) => (
+        <div key={idx} className={`grid-row ${shakingRow === idx ? "shake" : ""}`}>
+          {row.map((cell, cidx) => (
+            <div key={cidx} className={`grid-cell status-${cell.status || "empty"}`}>
+              {cell.char?.toUpperCase() || ""}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
